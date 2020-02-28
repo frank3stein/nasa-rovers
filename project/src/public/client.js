@@ -1,11 +1,7 @@
-let store = Immutable.Map({
-  user: Immutable.Map({ name: "Student" }),
-  apod: Immutable.Map({}),
-  rovers: Immutable.List([
-    Immutable.Map({ rover: "Curiosity", data: Immutable.Map({}) }),
-    Immutable.Map({ rover: "Opportunity", data: Immutable.Map({}) }),
-    "Spirit"
-  ])
+let store = Immutable.fromJS({
+  user: { name: "Student" },
+  apod: {},
+  rovers: [{ name: "Curiosity" }, { name: "Opportunity" }, { name: "Spirit" }]
 });
 let renderCount = 0;
 let apiCall = 0;
@@ -18,6 +14,37 @@ const updateStore = (state, newState) => {
   render(root, store);
 };
 
+const getRoversData = async state => {
+  const rovers = state.get("rovers");
+  let newRovers = Immutable.List([]);
+  const mergeRovers = await Promise.all(
+    rovers.map(async rover => {
+      const name = rover.get("name");
+      const data = await fetch(
+        `http://localhost:3000/rover/${name}`
+      ).then(data => data.json());
+      // console.log("data ", data);
+      rover = rover.merge(data.rover);
+      return rover;
+      // console.log(state.get("rovers"));
+    })
+  );
+  newRovers = newRovers.concat(mergeRovers);
+  console.log(newRovers);
+  return state.merge({ rovers: newRovers });
+  // updateStore(state, { rovers: newRovers });
+};
+
+// Initializing the page, we get the information needed concurrently and update the store only once only after we get everything.
+const initialize = async state => {
+  const states = await Promise.all([
+    getRoversData(state),
+    getImageOfTheDay(state)
+  ]);
+  state = states[0].merge(states[1]);
+  updateStore(store, state);
+};
+
 const render = async (root, state) => {
   renderCount++;
   console.log("Render count ", renderCount);
@@ -26,7 +53,7 @@ const render = async (root, state) => {
 
 // create content
 const App = state => {
-  let { rovers, apod } = state;
+  // let { rovers, apod } = state;
   //   console.log(state.get("user").get("name"));
   return `
         <header></header>
@@ -52,7 +79,9 @@ const App = state => {
 
 // listening for load event because page should load before any JS is called
 window.addEventListener("load", () => {
-  render(root, store);
+  // getRoversData(store);
+  initialize(store);
+  // render(root, store);
 });
 
 // ------------------------------------------------------  COMPONENTS
@@ -76,6 +105,9 @@ const Greeting = name => {
 // };
 
 const ImageOrVideo = image => {
+  if (!image) {
+    return;
+  }
   if (image.get("media_type") === "video") {
     return `
             <p>See today's featured video <a href="${image.get(
@@ -94,21 +126,25 @@ const ImageOrVideo = image => {
 // const ImageOfTheDay = today => photoDate => {};
 
 // Example of a pure function that renders infomation requested from the backend
+// TODO: Since we grab image of the day in initialize, we can remove the grabbing from here.
+// const ImageOfTheDay = async image => {
+//   const today = new Date().getDate();
+//   const apodDate = new Date(image.get("date")).getDate();
+//   if (image.size === 0) {
+//     image = await getImageOfTheDay(store);
+//     console.log(image);
+//     return ImageOrVideo(image);
+//   } else if (today === apodDate) {
+//     return ImageOrVideo(image);
+//   } else {
+//     console.log("Else has run");
+//     state = await getImageOfTheDay(store);
+//     return ImageOrVideo(image);
+//   }
+// };
+
 const ImageOfTheDay = image => {
-  if (image.size === 0) {
-    getImageOfTheDay(store);
-    return ImageOrVideo(image);
-  }
-
-  const today = new Date().getDate();
-  const apodDate = new Date(image.get("date")).getDate();
-
-  if (today === apodDate) {
-    return ImageOrVideo(image);
-  } else {
-    getImageOfTheDay(store);
-    return ImageOrVideo(image);
-  }
+  return ImageOrVideo(image);
 };
 
 // ------------------------------------------------------  API CALLS
@@ -116,20 +152,22 @@ const ImageOfTheDay = image => {
 // Example API call
 const getImageOfTheDay = async state => {
   let apod = state.get("apod");
-  if (apiCall > 0) {
-    // Safeguard for development, since Nasa api is limited by the hour.
-    console.log("ApiCall Stopped at", apiCall);
-    return;
-  }
+  // if (apiCall > 0) {
+  //   // Safeguard for development, since Nasa api is limited by the hour.
+  //   console.log("ApiCall Stopped at", apiCall);
+  //   return;
+  // }
   // if (apod.size === 0) {
   const response = await fetch(`http://localhost:3000/apod`).then(res => {
     apiCall++;
     return res.json();
   });
-  console.log(response.image);
+  console.log("Api Call: ", apiCall);
+  // console.log(response.image);
   apod = apod.merge(response.image);
-  console.log(apod);
-  updateStore(state, { apod });
-  console.log("Store apod ", store.get("apod"));
-  return response.image;
+  // console.log(apod);
+  // updateStore(state, { apod });
+  // console.log("Store apod ", store.get("apod"));
+  return state.merge({ apod });
+  // return response.image;
 };

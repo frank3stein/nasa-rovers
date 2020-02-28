@@ -28,9 +28,9 @@ app.get("/apod", async (req, res) => {
 });
 
 app.get("/rover/:rover", async (req, res) => {
-  const { rover } = req.params;
+  let { rover } = req.params;
   // make sure our rover is lowercase, it does not matter for the api, but it does for our check below.
-  rover.toLowerCase();
+  rover = rover.toLowerCase();
   if (
     !(rover === "curiosity" || rover === "opportunity" || rover === "spirit")
   ) {
