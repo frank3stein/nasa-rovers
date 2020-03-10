@@ -1,8 +1,4 @@
-import {
-  getImageOfTheDay,
-  getRoversData,
-  getRoverLatestImages
-} from "./api-access.js";
+import { getImageOfTheDay, getRoversData } from "./api-access.js";
 import { Rovers } from "./Components/Rovers.js";
 
 let store = Immutable.fromJS({
@@ -16,14 +12,11 @@ let store = Immutable.fromJS({
   selected: 0
 });
 let renderCount = 0;
-
 // add our markup to the page
 const root = document.getElementById("root");
 
 const updateStore = (state, newState) => {
-  console.log("Update has run");
   store = state.merge(newState);
-  console.log(store);
   render(root, store);
   return store;
 };
@@ -34,7 +27,6 @@ const initialize = async state => {
     getRoversData(state),
     getImageOfTheDay(state)
   ]);
-  console.log(states);
   // Here I merge the result of the api calls into a single state before updating the store
   const newState = state.withMutations(state => {
     Immutable.set(state, "rovers", Immutable.fromJS(states[0]));
@@ -58,33 +50,12 @@ const componentStitcher = state => (x, y) => {
   return (isString(x) ? x : x({ state })) + (isString(y) ? y : y({ state }));
 };
 
-// const setSelected = (rovers, index) => {
-//   rovers.forEach(rover => {
-//     if (rovers.get(index) === rover) {
-//       rover.set("selected", true);
-//       console.log("selected true ", index, rover);
-//     } else {
-//       // console.log(rover);
-//       rover.set("selected", false);
-//     }
-//   });
-// };
-
-const roverClick = (rovers, index) => {
-  // event.preventDefault();
-  setSelected(rovers, index);
-  // console.log(index);
-  return;
-};
-
 const Header = () => `<header></header>`;
-// ${children.length > 0 ? children.reduce(componentSticher(state)) : null}
-// ${children.reduce(componentStitcher)}
 const Main = ({ state }) => `<main>
   ${Greeting(state.get("user").get("name"))}
   ${Image(state.get("apod"))}
   <section class="rovers">
-  ${Rovers(state.get("rovers"), roverClick)}
+  ${Rovers(state.get("rovers"))}
   </section>
   <section id="carousel" class="slideshow-container">
   ${RoverCarousel(state.get("rovers").get(state.get("selected")), 0)}
@@ -93,38 +64,12 @@ const Main = ({ state }) => `<main>
   </main>`;
 
 const RoverCarousel = (rover, index) => {
-  console.log("carousel ", rover);
   const latestPhotos = rover.get("latest_photos").get(index);
   return `
   <h2>${rover.get("name")}</h2>
   <img src="${latestPhotos.get("img_src")}"/>
   <p>Date taken: ${latestPhotos.get("earth_date")}</p>`;
 };
-
-// const Carousel = latestPhotos => {
-//   let showIndex = 0;
-//   const leftClick = e => {
-//     e.preventDefault();
-//     if (showIndex === 0) {
-//       showIndex = latestPhotos.length - 1;
-//       return;
-//     }
-//     showIndex = showIndex--;
-//   };
-//   const rightClick = e => {
-//     e.preventDefault();
-//     if (showIndex === latestPhotos.length - 1) {
-//       showIndex = 0;
-//       return;
-//     }
-//     showIndex = showIndex++;
-//   };
-//   const carouselElement = document.getElementById("carousel");
-//   console.log(carouselElement);
-//   const roverImgsArray = rover.get("latest_photos").map(photo => {
-//     return `<img src='${photo.get("img_src")}'/>`;
-//   });
-// };
 const Image = image => `<section>
 <h3>Put things on the page!</h3>
 <p>Here is an example section.</p>
@@ -148,19 +93,14 @@ const App = state => components => components.reduce(componentStitcher(state));
 // listening for load event because page should load before any JS is called
 window.addEventListener("load", () => {
   initialize(store);
+  // I only add one eventlistener to catch all the clicks and react to it.
   document.getElementById("root").addEventListener("click", event => {
+    event.stopPropagation();
     // Since the buttons are created per rover inside rovers Array, the index of the specific button is equal to the index of the rover inside the rovers array.
     const roverButtons = document.querySelectorAll("section.rovers button");
     const roverIndex = Array.prototype.indexOf.call(roverButtons, event.target);
     const state = { selected: roverIndex };
     updateStore(store, state);
-    // console.log(
-    //   event.target,
-    //   buttons,
-    //   Array.prototype.indexOf.call(buttons, event.target)
-    // );
-
-    roverClick(store.get("rovers"), roverIndex);
   });
 });
 
@@ -177,7 +117,6 @@ const Greeting = name => {
 };
 
 const ImageOrVideo = image => {
-  console.log(image);
   if (!image) {
     return;
   }

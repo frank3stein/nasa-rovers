@@ -2,8 +2,6 @@ const getImageOfTheDay = async state => {
   const response = await fetch(`http://localhost:3000/apod`).then(res => {
     return res.json();
   });
-
-  console.log("Response image: ", response.image);
   return response.image;
 };
 const getRoversData = async state => {
@@ -21,19 +19,7 @@ const getRoversData = async state => {
     })
   );
 
-  console.log(mergeRovers);
   return mergeRovers.map(array => Object.assign(array[0].rover, array[1]));
-  // const result = mergeRovers.map(async array => {
-  //   const [roverData, latestPhotos] = await Promise.all([array[0], array[1]]);
-  //   // console.log("roverData", roverData.rover);
-  //   const rover = Object.assign(roverData.rover, latestPhotos);
-  //   console.log(rover);
-  //   return rover;
-  // });
-  // console.log(result);
-  // return result;
-  // console.log("Merge Rovers :", mergeRovers);
-  // return mergeRovers;
 };
 
 // Instead of requesting it separately, I decided to request it with the rover data in parallel and combine the data and return it.
