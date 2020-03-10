@@ -1,3 +1,41 @@
+/* RESET CSS */
+html {
+  box-sizing: border-box;
+  font-size: 24px;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ol,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* -------------------  MOBILE  --------------------- */
 
 body {
@@ -5,15 +43,49 @@ body {
   flex-direction: column;
   font-family: Arial;
   min-height: 100vh;
+  justify-content: center;
+  align-items: center;
 }
 
 header {
   /* header styles */
 }
 
+h1,
+h2,
+h3 {
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+p,
+img {
+  padding: 0.5rem;
+}
+
+img {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 main {
   flex: 1;
   padding: 20px;
+  max-width: 900px;
+}
+
+section.rovers {
+  display: flex;
+  flex-direction: row;
+}
+
+section.rovers article {
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+#carousel {
+  text-align: center;
 }
 
 footer {
@@ -21,7 +93,13 @@ footer {
 }
 
 /* -------------------  TABLET  --------------------- */
-@media (min-width: 768px) {
+@media (max-width: 768px) {
+  section.rovers {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   /* use mobile */
 }
 

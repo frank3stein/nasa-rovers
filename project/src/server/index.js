@@ -27,6 +27,7 @@ app.get("/apod", async (req, res) => {
   }
 });
 
+// get general rover info
 app.get("/rover/:rover", async (req, res) => {
   let { rover } = req.params;
   // make sure our rover is lowercase, it does not matter for the api, but it does for our check below.
@@ -41,7 +42,6 @@ app.get("/rover/:rover", async (req, res) => {
       .send({ message: `The client is requesting the wrong rover: ${rover}` });
     return;
   }
-  console.log(rover);
   try {
     const response = await fetch(
       `${baseUrlRovers + rover}?api_key=${process.env.API_KEY}`
@@ -49,6 +49,25 @@ app.get("/rover/:rover", async (req, res) => {
     res.send(response);
   } catch (error) {
     console.error(error);
+  }
+});
+
+// get the latest photos for the specified rover
+app.get("/rover/:rover/latest-photos", async (req, res) => {
+  let { rover } = req.params;
+  rover = rover.toLowerCase();
+
+  try {
+    const response = await fetch(
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover}/latest_photos?api_key=${process.env.API_KEY}`
+    ).then(res => res.json());
+
+    res.send(response);
+  } catch (err) {
+    console.error("Error at rover/latest-photos endpoint ", err);
+    res
+      .status(500)
+      .send(`Server error at rover/latest-photos endpoint : ${err}`);
   }
 });
 
