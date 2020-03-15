@@ -11,7 +11,6 @@ let store = Immutable.fromJS({
   ],
   selected: 0
 });
-let renderCount = 0;
 // add our markup to the page
 const root = document.getElementById("root");
 
@@ -43,8 +42,7 @@ const render = async (root, state) => {
 
 const isString = x => typeof x === "string";
 
-// higher order function, returns a function and takes in functions as arguments. x and y are either returned functions or functions. Both are possible.
-// HOR: Returns a function and takes in functions as arguments from the returned function.
+// HOR: returns a function and takes in functions as arguments. x and y are either returned functions or functions. Both are possible.
 const componentStitcher = state => (x, y) => {
   // If it is a string, stich it right away, if not stich after the function returns the string.
   // When calling the function, it calls it with the state. So you have the option to call the components with custom arguments and it will still stich them together. If it is not called, it will call by injecting the state into it.
@@ -53,7 +51,7 @@ const componentStitcher = state => (x, y) => {
 
 const Header = () => `<header></header>`;
 
-// HOR: function that returns other functions invocations
+// HOR: function that returns other functions' invocations
 const Main = ({ state }) => `<main>
   ${Greeting(state.get("user").get("name"))}
   ${Image(state.get("apod"))}
