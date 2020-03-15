@@ -71,6 +71,8 @@ const RoverCarousel = (rover, index) => {
   <img src="${latestPhotos.get("img_src")}"/>
   <p>Date taken: ${latestPhotos.get("earth_date")}</p>`;
 };
+
+// HOR: Ui component that returns a result with another HOR ImageOfTheDay
 const Image = image => `<section>
 <h3>Put things on the page!</h3>
 <p>Here is an example section.</p>
