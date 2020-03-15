@@ -37,13 +37,14 @@ const initialize = async state => {
 };
 
 const render = async (root, state) => {
-  renderCount++;
-  console.log("Render count ", renderCount);
-  const AppInitiated = App(state);
-  root.innerHTML = AppInitiated([Header, Main, Footer]);
+  const AppInitiated = App(state); // HOR: returns a function
+  root.innerHTML = AppInitiated([Header, Main, Footer]); // HOR: function, takes other functions as an argument.
 };
 
 const isString = x => typeof x === "string";
+
+// higher order function, returns a function and takes in functions as arguments. x and y are either returned functions or functions. Both are possible.
+// HOR: Returns a function and takes in functions as arguments from the returned function.
 const componentStitcher = state => (x, y) => {
   // If it is a string, stich it right away, if not stich after the function returns the string.
   // When calling the function, it calls it with the state. So you have the option to call the components with custom arguments and it will still stich them together. If it is not called, it will call by injecting the state into it.
@@ -51,6 +52,8 @@ const componentStitcher = state => (x, y) => {
 };
 
 const Header = () => `<header></header>`;
+
+// HOR: function that returns other functions invocations
 const Main = ({ state }) => `<main>
   ${Greeting(state.get("user").get("name"))}
   ${Image(state.get("apod"))}
@@ -88,6 +91,7 @@ const Footer = () => `<footer></footer>`;
 
 // Stich the whole app together
 // We also initiate the componentSticher with the state
+// HOR: Returns a function and accepts another function as an argument which is also a HOR
 const App = state => components => components.reduce(componentStitcher(state));
 
 // listening for load event because page should load before any JS is called
